@@ -1,0 +1,279 @@
+{
+  "name": "n8n-rag-bookstore-chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "bookstore-knowledge-base",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        -320
+      ],
+      "id": "d60c5987-9954-4062-816d-7bbf9dcdd2e4",
+      "name": "Qdrant Vector Store"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        144,
+        192
+      ],
+      "id": "8c57d6e4-4766-433d-ba12-da4db6c3a3af",
+      "name": "Embeddings Google Gemini"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "splitPages": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        -64
+      ],
+      "id": "55a36d5a-c75b-4502-be90-9222faf09110",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 400,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        448,
+        176
+      ],
+      "id": "b9687a0d-14cb-4ae4-912b-53f0303d79bb",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "تو یک دستیار هوشمند، صبور و مجرب برای «کتابفروشی Matbook» هستی. وظیفه اصلی تو راهنمایی مشتریان، پاسخ به سوالات درباره کاتالوگ کتاب‌ها، خلاصه اثر، قیمت، موجودی و روند خرید است.\n\nبرای ارائه پاسخ‌های دقیق طبق قوانین زیر عمل کن:\n\n۱. **الزام به استفاده از ابزار (RAG First):**\n   برای پاسخ به هر سوالی درباره کتاب‌ها، موجودی، قیمت، نویسندگان یا موضوعات مرتبط، حتماً و در قدم اول از ابزار `search_knowledge_base` استفاده کن تا اطلاعات دقیق را از پایگاه داده بخوانید.\n\n۲. **محدودیت مطلق به پایگاه داده (Strict Grounding):**\n   فقط و فقط بر اساس اطلاعاتی که ابزار `search_knowledge_base` برمی‌گرداند پاسخ بده. از اطلاعات عمومی خودت، حدس زدن، تخمین قیمت یا ادعای موجود بودن کتابی که در دیتابیس نیست، اکیداً خودداری کن.\n\n۳. **عدم وجود اطلاعات در دیتابیس:**\n   اگر پس از جستجو در ابزار، کتاب یا اطلاعات درخواستی کاربر را پیدا نکردی، با صراحت و احترام بگو: \n   «متأسفانه در حال حاضر اطلاعاتی درباره این کتاب یا موضوع در سیستم کتابفروشی ما ثبت نشده است.»\n\n۴. **حفظ چهارچوب موضوعی (Domain Boundary):**\n   تو فقط و فقط پاسخگوی موضوعات مرتبط با کتاب، کاتالوگ و خدمات این کتابفروشی هستی. اگر کاربر درباره موضوعات متفرقه (مثل برنامه‌نویسی، آشپزی، اخبار، آب‌وهوا، چت عمومی و...) سوال پرسید، مؤدبانه پاسخ بده:\n   «من دستیار تخصصی کتابفروشی Matbook هستم و تنها می‌توانم درباره کتاب‌ها و خدمات کتابفروشی شما را راهنمایی کنم.»\n\n۵. **لحن و شیوه پاسخ‌دهی:**\n   - لحن تو باید محترمانه، صمیمی، بسیار واضح و ساده باشد.\n   - پاسخ‌ها را طولانی و خسته‌کننده نکن؛ نکات اصلی (نام کتاب، نویسنده، قیمت یا موجودی) را برجسته کن.\n   - در صورت درخواست کاربر برای توضیح درباره هر کتاب، یک خلاصه کوتاه، جذاب و دقیق بر اساس دیتابیس ارائه بده."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1008,
+        -464
+      ],
+      "id": "eceaed8a-9748-47a0-bd39-9c6b2a82a593",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        -240
+      ],
+      "id": "38f943e2-eaf5-4f10-8399-8a1b6df76c65",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "برای جستجوی اطلاعات، قوانین، کاتالوگ و پاسخ به سوالات کاربران درباره کتاب‌ها از این ابزار استفاده کن.",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "bookstore-knowledge-base",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        1168,
+        -160
+      ],
+      "id": "4d54e11d-c0fe-474d-8179-d916b3424169",
+      "name": "search_knowledge_base"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1040,
+        -160
+      ],
+      "id": "45fc2c78-00df-4d64-b11a-0c7f54f2e3c9",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        -464
+      ],
+      "id": "52a8cc2c-f85e-4da7-891e-25bffba09ea3",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "formTitle": "form-productions",
+        "formDescription": "send your forms",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "form",
+              "fieldType": "file",
+              "acceptFileTypes": "pdf"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        16,
+        -320
+      ],
+      "id": "95ea74f4-6bc4-4bbd-8040-58acc6eaef8f",
+      "name": "On form submission"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}
